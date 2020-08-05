@@ -59,9 +59,7 @@ class App extends Component {
     render() {
         return (
             <React.Fragment>
-                <div className="bg-secondary">
-                    <GRID />
-                </div>
+                    <GRID/>
             </React.Fragment>
         );
     }

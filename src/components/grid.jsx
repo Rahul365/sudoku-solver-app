@@ -181,14 +181,16 @@ class GRID extends Component {
             this.setState({ board: grid })
             return true;
         }
+        var next_row;
+        var next_col;
         if (grid[row][col].v === 0) {
             // console.log("Yes");
             for (var val = 1; val <= 9; ++val) {
                 grid[row][col].v = val;
                 if (this.validateSudoku(grid) === true) {
                     // console.log(val +" Yes");
-                    var next_col = (col + 1) % N;
-                    var next_row = row + (next_col === 0 ? 1 : 0);
+                    next_col = (col + 1) % N;
+                    next_row = row + (next_col === 0 ? 1 : 0);
                     if (this.fillGrid(grid, next_row, next_col, N)) {
                         return true;
                     }
@@ -197,8 +199,8 @@ class GRID extends Component {
             }
         }
         else {
-            var next_col = (col + 1) % N;
-            var next_row = row + (next_col === 0 ? 1 : 0);
+            next_col = (col + 1) % N;
+            next_row = row + (next_col === 0 ? 1 : 0);
             if (this.fillGrid(grid, next_row, next_col, N)) {
                 return true;
             }
