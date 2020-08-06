@@ -63,7 +63,7 @@ class GRID extends Component {
                                                             var val = self.state.board[id][j].v;
                                                             cols.push(
                                                                 <div id={col} key={col} className=" border border-black text-white bg-info p-2 m-0.2">
-                                                                    <button className='btn' onClick={() => self.handleIncr(cell)}>{val}</button>
+                                                                    <button className='btn text-white' onClick={() => self.handleIncr(cell)}>{val}</button>
                                                                 </div>
                                                             );
                                                         }
