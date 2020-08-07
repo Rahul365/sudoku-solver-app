@@ -31,7 +31,7 @@ class GRID extends Component {
     showgrid() {
         const { board } = this.state;
         if (board.length === 0) {
-            return (<div class="nav justify-content-center">Click on 'Set Puzzle' to build grid</div>);
+            return (<div class="nav justify-content-center">{this.buildGrid()}</div>);
         }
         var self = this;
         // console.log(self);
@@ -91,7 +91,7 @@ class GRID extends Component {
                     {this.showgrid()}
                 </main>
                 <div className="form-inline navbar navbar-dark bg-dark">
-                    <button className='btn btn-info m-1 sm' onClick={this.buildGrid}>Set Puzzle</button>
+                    <button className='btn btn-info m-1 sm' onClick={this.buildGrid}>Reset Puzzle</button>
                     <button className='btn btn-success m-1 sm' onClick={this.solveGrid}>Solve Puzzle</button>
                 </div>
             </React.Fragment>
