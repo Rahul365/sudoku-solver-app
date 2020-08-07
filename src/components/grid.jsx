@@ -5,7 +5,8 @@ class GRID extends Component {
     state = {
         board: []
     }
-    
+
+    /** building the grid during mounting phase of the component*/
     componentDidMount(){
         this.buildGrid();
     }
@@ -20,6 +21,16 @@ class GRID extends Component {
             }
         }
         this.setState({ board: a });
+    };
+
+    resetGrid = ()=>{
+        var grid = this.state.board;
+        for(var r = 0;r < 9;++r){
+            for(var c = 0;c < 9;++c){
+                grid[r][c].v = 0;
+            }
+        }
+        this.setState({board : grid});
     };
     /**This method handle Incrementing the value of cell from 1 to 9
      * 0->cell is not filled
@@ -93,7 +104,7 @@ class GRID extends Component {
                     {this.showgrid()}
                 </main>
                 <div className="nav justify-content-center bg-white">
-                    <button className='btn btn-info m-1 sm' onClick={this.buildGrid}>Reset Puzzle</button>
+                    <button className='btn btn-info m-1 sm' onClick={this.resetGrid}>Reset Puzzle</button>
                     <button className='btn btn-success m-1 sm' onClick={this.solveGrid}>Solve Puzzle</button>
                 </div>
             </React.Fragment>
@@ -223,7 +234,7 @@ class GRID extends Component {
         var grid = this.state.board;
         var ok_fill = this.fillGrid(grid, 0, 0, grid.length) === true ? 1 : 0;
         var ok_grid = this.validateSudoku(grid) === true ? 1 : 0;
-        if (ok_fill === 0 || ok_grid === 0) {
+        if (ok_grid === 0 || ok_fill === 0) {
             window.alert("Invalid puzzle!");
         }
         else {
