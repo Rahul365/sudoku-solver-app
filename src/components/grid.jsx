@@ -1,10 +1,15 @@
 import React, { Component } from 'react';
-
+const LOG = 0;
 
 class GRID extends Component {
     state = {
         board: []
     }
+    
+    componentDidMount(){
+        this.buildGrid();
+    }
+
     /**Setting up empty grid*/
     buildGrid = () => {
         var a = new Array(9);
@@ -30,15 +35,12 @@ class GRID extends Component {
 
     showgrid() {
         const { board } = this.state;
-        if (board.length === 0) {
-            return (<div class="nav justify-content-center">{this.buildGrid()}</div>);
-        }
         var self = this;
         // console.log(self);
         // console.log(self.state.board);
         return (
             <React.Fragment>
-                <div id='grid' class="nav justify-content-center border border-black bg-white">
+                <div id='grid' className="nav justify-content-center bg-white">
                     {
                         (
                             // IMIF->rows
@@ -87,10 +89,10 @@ class GRID extends Component {
     render() {
         return (
             <React.Fragment>
-                <main className='container'>
+                <main className='container' onLoad = {this.buildGrid}>
                     {this.showgrid()}
                 </main>
-                <div className="form-inline navbar navbar-dark bg-dark">
+                <div className="nav justify-content-center bg-white">
                     <button className='btn btn-info m-1 sm' onClick={this.buildGrid}>Reset Puzzle</button>
                     <button className='btn btn-success m-1 sm' onClick={this.solveGrid}>Solve Puzzle</button>
                 </div>
@@ -159,26 +161,32 @@ class GRID extends Component {
         const N = grid.length;
         /**Row Checks*/
         if (this.RowCheck(grid, N) === 0) return false;
+        if (LOG === 1)
+            console.log("RowCheck : pass");
         /**Col Checks*/
         if (this.ColCheck(grid, N) === 0) return false;
-
+        if (LOG === 1)
+            console.log("ColCheck : pass");
         /**Cell Checks*/
         if (this.CellCheck(grid, N) === 0) return false;
+        if (LOG === 1)
+            console.log("CellCheck : pass");
         return true;
     };
 
     fillGrid(grid, row, col, N) {
         //for curren row-r
-        console.log(row + " " + col + " " + N);
+        if (LOG === 1)
+            console.log(row + " " + col + " " + N);
         if (row === N) {
             for (var r = 0; r < N; ++r) {
                 var line = "";
                 for (var c = 0; c < N; ++c) {
                     line += grid[r][c].v + " ";
                 }
-                console.log(r + "# : " + line);
+                if (LOG === 1)
+                    console.log(r + "# : " + line);
             }
-            this.setState({ board: grid })
             return true;
         }
         var next_row;
@@ -210,15 +218,19 @@ class GRID extends Component {
 
     solveGrid = () => {
         // console.log(this.state.board);
-        console.log("Solving Puzzle....");
+        if (LOG === 1)
+            console.log("Solving Puzzle....");
         var grid = this.state.board;
-        var ok = this.fillGrid(grid, 0, 0, grid.length) === true ? 1 : 0;
-        if (ok === 0) {
+        var ok_fill = this.fillGrid(grid, 0, 0, grid.length) === true ? 1 : 0;
+        var ok_grid = this.validateSudoku(grid) === true ? 1 : 0;
+        if (ok_fill === 0 || ok_grid === 0) {
             window.alert("Invalid puzzle!");
         }
-        else if (ok === 1)
-            console.log("Sudoku is " + (this.fillGrid(grid, 0, 0, grid.length) === true ? "solved" : "Impossible"));
-        // console.log(grid);
+        else {
+            if (LOG === 1)
+                console.log("Sudoku is " + (ok_fill === true ? "solved" : "Impossible"));
+            this.setState({ board: grid })
+        }    // console.log(grid);
         // console.log(this.state.board);
         // console.log("Grid is "+(this.validateSudoku(grid)===true?"valid":"invalid"));
     };
