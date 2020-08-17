@@ -3,7 +3,9 @@ const LOG = 0;
 
 class GRID extends Component {
     state = {
-        board: []
+        board: [],
+        userEntered : [],
+        unsolved : true
     }
 
     /** building the grid during mounting phase of the component*/
@@ -13,24 +15,29 @@ class GRID extends Component {
 
     /**Setting up empty grid*/
     buildGrid = () => {
+        var mark = new Array(9);
         var a = new Array(9);
         for (var i = 0; i < a.length; ++i) {
             a[i] = new Array(9);
+            mark[i] = new Array(9);
             for (var j = 0; j < a[i].length; ++j) {
                 a[i][j] = { r: i, c: j, v: 0 };
+                mark[i][j] = false;
             }
         }
-        this.setState({ board: a });
+        this.setState({ board: a ,userEntered : mark,unsolved:true});
     };
 
     resetGrid = ()=>{
         var grid = this.state.board;
+        var mark = this.state.userEntered;
         for(var r = 0;r < 9;++r){
             for(var c = 0;c < 9;++c){
                 grid[r][c].v = 0;
+                mark[r][c] = false;
             }
         }
-        this.setState({board : grid});
+        this.setState({board : grid,userEntered:mark,unsolved:true});
     };
     /**This method handle Incrementing the value of cell from 1 to 9
      * 0->cell is not filled
@@ -39,10 +46,15 @@ class GRID extends Component {
     handleIncr = (cell) => {
         // console.log(cell);
         var a = this.state.board;
+        var mark = this.state.userEntered;
         a[cell.r][cell.c].v = (a[cell.r][cell.c].v + 1) % 10;
-        this.setState({ board: a });
+        if(this.state.unsolved === true){
+            mark[cell.r][cell.c] = (a[cell.r][cell.c].v===0?false:true)//mark this cell as userEntered
+        }
+        this.setState({ board: a ,userEntered:mark});
     };
 
+    
 
     showgrid() {
         const { board } = this.state;
@@ -73,10 +85,12 @@ class GRID extends Component {
                                                             var col = id + "" + j;
                                                             // console.log(col);
                                                             let cell = self.state.board[id][j];
-                                                            var val = self.state.board[id][j].v;
+                                                            var val  = self.state.board[id][j].v;
+                                                            let classesBtn = 'btn text-white';
+                                                            let classesCell = "border border-black text-white p-2 m-0.2 "+(self.state.userEntered[id][j]===true?"bg-dark":"bg-info");
                                                             cols.push(
-                                                                <div id={col} key={col} className=" border border-black text-white bg-info p-2 m-0.2">
-                                                                    <button className='btn text-white' onClick={() => self.handleIncr(cell)}>{val}</button>
+                                                                <div id={col} key={col} className={classesCell}>
+                                                                    <button className={classesBtn} onClick={() => self.handleIncr(cell)}>{val}</button>
                                                                 </div>
                                                             );
                                                         }
@@ -240,7 +254,7 @@ class GRID extends Component {
         else {
             if (LOG === 1)
                 console.log("Sudoku is " + (ok_fill === true ? "solved" : "Impossible"));
-            this.setState({ board: grid })
+            this.setState({ board: grid , unsolved:false})
         }    // console.log(grid);
         // console.log(this.state.board);
         // console.log("Grid is "+(this.validateSudoku(grid)===true?"valid":"invalid"));
