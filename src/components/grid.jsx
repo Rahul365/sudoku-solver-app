@@ -64,17 +64,11 @@ class GRID extends Component {
     };
 
     updateValueOnChange = (event)=>{
+        /**If any new value is inputted by the user, then this function will come in effect*/
         var row = event.target.dataset.rw;
         var col = event.target.dataset.cl;
         var new_val =  event.target.value;
-        if(new_val < 0 && new_val > 9) return;
-        console.log(row + " " + col + " "+ new_val);
-        if(new_val < 0 && new_val > 9){
-            new_val = this.state.board[row][col];
-            event.target.dataset.value = new_val;
-            event.target.value = new_val;
-            return;
-        }
+        // console.log(row + " " + col + " "+ new_val);
         var a = this.state.board;
         var mark = this.state.userEntered;
         a[row][col].v = new_val;
@@ -82,22 +76,27 @@ class GRID extends Component {
             mark[row][col] = (a[row][col].v===0?false:true)//mark this cell as userEntered
         }
         
-        event.target.dataset.value = new_val;
-        event.target.value = new_val;
+        event.target.value = new_val;//we update the value the target value to new value here
         this.setState({ board: a ,userEntered:mark});
     };
 
     updateValueOnFocus = (event)=>{
         //when object gets focus
-        console.log("onFocus called " + event.target.dataset);
+        // console.log("onFocus called " + event.target.dataset);
+        /**
+         * Store the previous value of the element in data-value and reset the value of the element
+         */
         event.target.dataset.value = event.target.value;
         event.target.value = '';
     };
 
     updateValueOnBlur = (event)=>{
         //when object loses focus
-        console.log("onBlur called " + event.target.dataset);
-        event.target.value = event.target.dataset.value;
+        // console.log("onBlur called " + event.target.dataset);
+        //If there is now new value inputted and the elemen loses focus then we restore the previous value for it
+        if(event.target.value === ''){
+            event.target.value = event.target.dataset.value;
+        }
     };
 
     showgrid() {
@@ -172,6 +171,18 @@ class GRID extends Component {
         );
     };
 
+    valuesCheck(grid,N){
+        for (var row = 0; row < N; ++row) {
+            var cnt = new Array(N + 1);
+            for (var i = 0; i < N + 1; ++i) cnt[i] = 0;
+            for (var col = 0; col < N; ++col) {
+                var val = grid[row][col].v;
+                if(val < 0 || val > 9) return 0;
+            }
+        }
+        return 1;
+    };
+
     RowCheck(grid, N) {
         for (var row = 0; row < N; ++row) {
             var cnt = new Array(N + 1);
@@ -186,6 +197,7 @@ class GRID extends Component {
         }
         return 1;
     };
+
 
     ColCheck(grid, N) {
         for (var col = 0; col < N; ++col) {
@@ -227,11 +239,13 @@ class GRID extends Component {
         return 1;
     };
 
+
     /**To do the validation of the grid*/
     validateSudoku(grid) {
         // console.log(grid);
         const N = grid.length;
         /**Row Checks*/
+        if(this.valuesCheck(grid,N) === 0) return false;
         if (this.RowCheck(grid, N) === 0) return false;
         if (LOG === 1)
             console.log("RowCheck : pass");
@@ -245,6 +259,7 @@ class GRID extends Component {
             console.log("CellCheck : pass");
         return true;
     };
+
 
     fillGrid(grid, row, col, N) {
         //for curren row-r
