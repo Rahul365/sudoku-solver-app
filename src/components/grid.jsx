@@ -1,4 +1,6 @@
 import React, { Component } from 'react';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 const LOG = 0;
 
 class GRID extends Component {
@@ -54,7 +56,11 @@ class GRID extends Component {
         this.setState({ board: a ,userEntered:mark});
     };
 
-    
+    notifyError = ()=>{
+        if(this.validateSudoku(this.state.board)===false){
+            toast.error("Puzzle is invalid!",{position:toast.POSITION.TOP_LEFT,autoClose:2000});
+        }
+    };
 
     showgrid() {
         const { board } = this.state;
@@ -110,7 +116,6 @@ class GRID extends Component {
         );
     }
 
-
     render() {
         return (
             <React.Fragment>
@@ -119,7 +124,8 @@ class GRID extends Component {
                 </main>
                 <div className="nav justify-content-center bg-white">
                     <button className='btn btn-info m-1 sm' onClick={this.resetGrid}>Reset Puzzle</button>
-                    <button className='btn btn-success m-1 sm' onClick={this.solveGrid}>Solve Puzzle</button>
+                    <button className='btn btn-success m-1 sm' onClick={()=>{this.solveGrid();this.notifyError()}}>Solve Puzzle</button>
+                    <ToastContainer/>
                 </div>
             </React.Fragment>
         );
@@ -249,13 +255,15 @@ class GRID extends Component {
         var ok_fill = this.fillGrid(grid, 0, 0, grid.length) === true ? 1 : 0;
         var ok_grid = this.validateSudoku(grid) === true ? 1 : 0;
         if (ok_grid === 0 || ok_fill === 0) {
-            window.alert("Invalid puzzle!");
+            // window.alert("Invalid puzzle!");
+            return (<span>Invalid Puzzle!</span>);
         }
         else {
             if (LOG === 1)
                 console.log("Sudoku is " + (ok_fill === true ? "solved" : "Impossible"));
             this.setState({ board: grid , unsolved:false})
         }    // console.log(grid);
+        return (<span>Puzzle Solved</span>);
         // console.log(this.state.board);
         // console.log("Grid is "+(this.validateSudoku(grid)===true?"valid":"invalid"));
     };
