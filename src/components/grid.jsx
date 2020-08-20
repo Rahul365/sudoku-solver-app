@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import '../customcss/custom.css';
 const LOG = 0;
 
 class GRID extends Component {
@@ -62,6 +63,43 @@ class GRID extends Component {
         }
     };
 
+    updateValueOnChange = (event)=>{
+        var row = event.target.dataset.rw;
+        var col = event.target.dataset.cl;
+        var new_val =  event.target.value;
+        if(new_val < 0 && new_val > 9) return;
+        console.log(row + " " + col + " "+ new_val);
+        if(new_val < 0 && new_val > 9){
+            new_val = this.state.board[row][col];
+            event.target.dataset.value = new_val;
+            event.target.value = new_val;
+            return;
+        }
+        var a = this.state.board;
+        var mark = this.state.userEntered;
+        a[row][col].v = new_val;
+        if(this.state.unsolved === true){
+            mark[row][col] = (a[row][col].v===0?false:true)//mark this cell as userEntered
+        }
+        
+        event.target.dataset.value = new_val;
+        event.target.value = new_val;
+        this.setState({ board: a ,userEntered:mark});
+    };
+
+    updateValueOnFocus = (event)=>{
+        //when object gets focus
+        console.log("onFocus called " + event.target.dataset);
+        event.target.dataset.value = event.target.value;
+        event.target.value = '';
+    };
+
+    updateValueOnBlur = (event)=>{
+        //when object loses focus
+        console.log("onBlur called " + event.target.dataset);
+        event.target.value = event.target.dataset.value;
+    };
+
     showgrid() {
         const { board } = this.state;
         var self = this;
@@ -84,19 +122,22 @@ class GRID extends Component {
                                             {
                                                 (
                                                     // IMIF->columns
-                                                    function (id) {
+                                                    function (rid) {
                                                         // console.log(self);
                                                         var cols = new Array(0);
-                                                        for (var j = 0; j < board[id].length; ++j) {
-                                                            var col = id + "" + j;
+                                                        for (var cid = 0; cid < board[rid].length; ++cid) {
+                                                            var col = rid + "" + cid;
                                                             // console.log(col);
-                                                            let cell = self.state.board[id][j];
-                                                            var val  = self.state.board[id][j].v;
+                                                            //<button className={classesBtn} onClick={() => self.handleIncr(cell)}>{val}</button>
+
+                                                            let cell = self.state.board[rid][cid];
+                                                            var val  = self.state.board[rid][cid].v;
                                                             let classesBtn = 'btn text-white';
-                                                            let classesCell = "border border-black text-white p-2 m-0.2 "+(self.state.userEntered[id][j]===true?"bg-dark":"bg-info");
+                                                            let classesCell = "border border-black text-white p-2 m-0.2 "+(self.state.userEntered[rid][cid]===true?"bg-dark":"bg-info");
+                                                    
                                                             cols.push(
                                                                 <div id={col} key={col} className={classesCell}>
-                                                                    <button className={classesBtn} onClick={() => self.handleIncr(cell)}>{val}</button>
+                                                                    <input size="1" key = {cell} className = {classesBtn} onChange={self.updateValueOnChange} onFocus = {self.updateValueOnFocus} onBlur={self.updateValueOnBlur}  data-rw={rid} data-cl={cid} value={val} type="number" min="0" max="9" placeholder="0"/>
                                                                 </div>
                                                             );
                                                         }
