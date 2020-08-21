@@ -42,21 +42,8 @@ class GRID extends Component {
     }
     this.setState({ board: grid, userEntered: mark, unsolved: true });
   };
-  /**This method handle Incrementing the value of cell from 1 to 9
-   * 0->cell is not filled
-   * (1-9)->only values cell can keep
-   */
-  handleIncr = (cell) => {
-    // console.log(cell);
-    var a = this.state.board;
-    var mark = this.state.userEntered;
-    a[cell.r][cell.c].v = (a[cell.r][cell.c].v + 1) % 10;
-    if (this.state.unsolved === true) {
-      mark[cell.r][cell.c] = a[cell.r][cell.c].v === 0 ? false : true; //mark this cell as userEntered
-    }
-    this.setState({ board: a, userEntered: mark });
-  };
 
+  
   notifyError = () => {
     if (this.validateSudoku(this.state.board) === false) {
       toast.error("Puzzle is invalid!", {
@@ -71,34 +58,37 @@ class GRID extends Component {
     var row = event.target.dataset.rw;
     var col = event.target.dataset.cl;
     var new_val = event.target.value;
-    // console.log(row + " " + col + " "+ new_val);
     var a = this.state.board;
     var mark = this.state.userEntered;
+    if(LOG===1)
+    console.log(row + " " + col + " "+ new_val + " " + mark[row][col] );
     a[row][col].v = new_val;
     if (this.state.unsolved === true) {
-      mark[row][col] = a[row][col].v === 0 ? false : true; //mark this cell as userEntered
+       mark[row][col] = (new_val >= 1 && new_val<=9)? true : false; //mark this cell as userEntered
     }
-
+    if(LOG===1)
+    console.log(row + " " + col + " "+ new_val + " " + mark[row][col] );
     event.target.value = new_val; //we update the value the target value to new value here
     this.setState({ board: a, userEntered: mark });
   };
 
   updateValueOnFocus = (event) => {
-    //when object gets focus
-    // console.log("onFocus called " + event.target.dataset);
     /**
+     * when object gets focus
+     * console.log("onFocus called " + event.target.dataset);
      * Store the previous value of the element in data-value and reset the value of the element
      */
-    event.target.dataset.value = event.target.value;
-    event.target.value = "";
+    event.target.dataset.value = Number(event.target.value);
+    event.target.value = '';
   };
 
   updateValueOnBlur = (event) => {
-    //when object loses focus
-    // console.log("onBlur called " + event.target.dataset);
-    //If there is now new value inputted and the elemen loses focus then we restore the previous value for it
-    if (event.target.value === "") {
-      event.target.value = event.target.dataset.value;
+    /**when object loses focus
+     * console.log("onBlur called " + event.target.dataset.value + "  "+ event.target.value);
+     *  If there is now new value inputted and the elemen loses focus then we restore the previous value for it
+    */
+     if (event.target.value === '') {
+      event.target.value = Number(event.target.dataset.value);
     }
   };
 
@@ -107,72 +97,83 @@ class GRID extends Component {
     var self = this;
     // console.log(self);
     // console.log(self.state.board);
+    /**To add borders betweem 3*3 blocks use colgroup*/
     return (
       <React.Fragment>
-        <div id="grid" className="nav justify-content-center bg-white">
+        <div>
+        <span>SUDOKU OF THE DAY</span>
+        </div>
+        <table id="grid" align="center">
+          <colgroup><col /><col /><col /></colgroup>
+          <colgroup><col /><col /><col /></colgroup>
+          <colgroup><col /><col /><col /></colgroup>
           {
             // IMIF->rows
             (function () {
               // console.log(self);
-              var rows = new Array(0);
-              for (var i = 0; i < board.length; ++i) {
-                var row = "r" + (i + 1);
-                // console.log(row);
-                rows.push(
-                  <div
-                    id={row}
-                    key={row}
-                    className="d-inline-block p-2 m-0.2   text-white"
-                  >
-                    {
-                      // IMIF->columns
-                      (function (rid) {
-                        // console.log(self);
-                        var cols = new Array(0);
-                        for (var cid = 0; cid < board[rid].length; ++cid) {
-                          var col = rid + "" + cid;
-                          // console.log(col);
-                          //<button className={classesBtn} onClick={() => self.handleIncr(cell)}>{val}</button>
+              var blocks = new Array(0);
+              var blocknum = 0;
+              for (var rownum = 0; rownum < board.length; rownum += 3) {
+                  ++blocknum;
+                  var blockId = blocknum+" "+ rownum;
+                  var rows = new Array(0);
+                  for (var i = rownum; i < rownum + 3; ++i) {
+                    var row = "r" + (i + 1);
+                    // console.log(row);
+                    rows.push(
+                      <tr
+                        id={row}
+                        key={row}
+                      >
+                        {
+                          // IMIF->columns
+                          (function (rid) {
+                            // console.log(self);
+                            var cols = new Array(0);
+                            for (var cid = 0; cid < board[rid].length; ++cid) {
+                              var col = rid + "" + cid;
+                              // console.log(col);
+                              let cell = self.state.board[rid][cid];
+                              var val = self.state.board[rid][cid].v;
+                              let classesBtn = "btn text-black";
+                              let classesCell =
+                                "border border-black  text-black bg-" +
+                                (self.state.userEntered[rid][cid] === true
+                                  ? "warning"
+                                  : "white");
 
-                          let cell = self.state.board[rid][cid];
-                          var val = self.state.board[rid][cid].v;
-                          let classesBtn = "btn text-white";
-                          let classesCell =
-                            "border border-black text-white p-2 m-0.2 " +
-                            (self.state.userEntered[rid][cid] === true
-                              ? "bg-dark"
-                              : "bg-info");
-
-                          cols.push(
-                            <div id={col} key={col} className={classesCell}>
-                              <input
-                                size="1"
-                                key={cell}
-                                className={classesBtn}
-                                onChange={self.updateValueOnChange}
-                                onFocus={self.updateValueOnFocus}
-                                onBlur={self.updateValueOnBlur}
-                                data-rw={rid}
-                                data-cl={cid}
-                                value={val}
-                                type="number"
-                                min="0"
-                                max="9"
-                                placeholder="0"
-                              />
-                            </div>
-                          );
+                              cols.push(
+                                <td id={col} key={col} className={classesCell}>
+                                  <input
+                                    className={classesBtn}
+                                    size="1"
+                                    key={cell}
+                                    onChange={self.updateValueOnChange}
+                                    onFocus={self.updateValueOnFocus}
+                                    onBlur={self.updateValueOnBlur}
+                                    data-rw={rid}
+                                    data-cl={cid}
+                                    value={val}
+                                    type="number"
+                                    min="0"
+                                    max="9"
+                                    placeholder="0"
+                                  />
+                                </td>
+                              );
+                            }
+                            return cols;
+                          })(i)
                         }
-                        return cols;
-                      })(i)
-                    }
-                  </div>
-                );
+                      </tr>
+                    );
+                  }
+                  blocks.push(<tbody id={blockId} key={blockId} >{rows}</tbody>);
               }
-              return rows;
+              return blocks;
             })()
           }
-        </div>
+        </table>
       </React.Fragment>
     );
   }
@@ -211,6 +212,7 @@ class GRID extends Component {
         if (val < 0 || val > 9) return 0;
       }
     }
+    // console.log(grid);
     return 1;
   }
 
@@ -302,7 +304,7 @@ class GRID extends Component {
     }
     var next_row;
     var next_col;
-    if (grid[row][col].v === 0) {
+    if (Number(grid[row][col].v) === 0) {
       // console.log("Yes");
       for (var val = 1; val <= 9; ++val) {
         grid[row][col].v = val;
@@ -332,17 +334,15 @@ class GRID extends Component {
     var grid = this.state.board;
     var ok_fill = this.fillGrid(grid, 0, 0, grid.length) === true ? 1 : 0;
     var ok_grid = this.validateSudoku(grid) === true ? 1 : 0;
-    if (ok_grid === 0 || ok_fill === 0) {
-      // window.alert("Invalid puzzle!");
-      return <span>Invalid Puzzle!</span>;
-    } else {
+    // console.log(grid);
+    if (ok_grid === 1 && ok_fill === 1) {
       if (LOG === 1)
         console.log(
           "Sudoku is " + (ok_fill === true ? "solved" : "Impossible")
         );
       this.setState({ board: grid, unsolved: false });
-    } // console.log(grid);
-    return <span>Puzzle Solved</span>;
+    } 
+    // console.log(grid);
     // console.log(this.state.board);
     // console.log("Grid is "+(this.validateSudoku(grid)===true?"valid":"invalid"));
   };

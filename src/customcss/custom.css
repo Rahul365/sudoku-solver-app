@@ -6,6 +6,40 @@ input::-webkit-inner-spin-button {
 }
 
 /* Firefox */
-input[type=number] {
+input[type="number"] {
   -moz-appearance: textfield;
+}
+
+table {
+  text-align: center;
+  border-collapse: collapse;
+  font-family: Calibri, sans-serif;
+}
+
+colgroup,
+tbody {
+  border: solid medium;
+}
+
+td {
+  border: solid thin;
+  height: 1.4em;
+  width: 1.4em;
+  text-align: center;
+  padding: 0;
+}
+
+span {
+  background: #222;
+  color: #fff;
+  display: inline-block;
+  /* float:left;  remove */
+  margin: 10px;
+  padding: 5px 10px;
+}
+
+div {
+  text-align: center;
+  margin: 10px 10px 0 0;
+  padding: 5px 10px;
 }
