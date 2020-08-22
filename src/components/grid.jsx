@@ -42,9 +42,8 @@ class GRID extends Component {
     }
     this.setState({ board: grid, userEntered: mark, unsolved: true });
   };
-
   
-  notifyError = () => {
+ notifyError = () => {
     if (this.validateSudoku(this.state.board) === false) {
       toast.error("Puzzle is invalid!", {
         position: toast.POSITION.TOP_LEFT,
@@ -58,6 +57,7 @@ class GRID extends Component {
     var row = event.target.dataset.rw;
     var col = event.target.dataset.cl;
     var new_val = event.target.value;
+    new_val = new_val % 10;
     var a = this.state.board;
     var mark = this.state.userEntered;
     if(LOG===1)
