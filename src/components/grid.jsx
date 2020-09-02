@@ -8,6 +8,7 @@ class GRID extends Component {
   state = {
     board: [],
     userEntered: [],
+    readOnly : [],
     unsolved: true,
   };
 
@@ -20,29 +21,85 @@ class GRID extends Component {
   buildGrid = () => {
     var mark = new Array(9);
     var a = new Array(9);
+    var read = new Array(9);
     for (var i = 0; i < a.length; ++i) {
       a[i] = new Array(9);
       mark[i] = new Array(9);
+      read[i] = new Array(9);
       for (var j = 0; j < a[i].length; ++j) {
         a[i][j] = { r: i, c: j, v: 0 };
         mark[i][j] = false;
+        read[i][j] = false;
       }
     }
-    this.setState({ board: a, userEntered: mark, unsolved: true });
+    this.setState({ board: a, userEntered: mark, unsolved: true ,readOnly:read});
   };
 
   resetGrid = () => {
     var grid = this.state.board;
     var mark = this.state.userEntered;
-    for (var r = 0; r < 9; ++r) {
-      for (var c = 0; c < 9; ++c) {
-        grid[r][c].v = 0;
-        mark[r][c] = false;
+    var read = this.state.readOnly;
+    for (var row_num = 0; row_num < 9; ++row_num) {
+      for (var col_num = 0; col_num < 9; ++col_num) {
+        // console.log(grid[row_num][col_num]);
+        grid[row_num][col_num].v = 0;
+        mark[row_num][col_num] = false;
+        read[row_num][col_num] = false;
       }
     }
-    this.setState({ board: grid, userEntered: mark, unsolved: true });
+    this.setState({ board: grid, userEntered: mark,readOnly:read, unsolved: true });
   };
   
+  buildPuzzle = ()=>{
+    this.resetGrid();
+    var grid = this.state.board;
+    var mark = this.state.userEntered;
+    var read = this.state.readOnly;
+    var vis  = new Array(81);
+    while(true){
+      var number_of_cells_to_fill = 20; //atmost this number of cells will be filled
+      for(var i = 0;i<=number_of_cells_to_fill;++i){
+        var cell_hash =  Number(Math.floor(Math.random()*80)+1);
+        var row_num = Number(Math.floor(cell_hash/9));
+        var col_num = Number(Math.floor(cell_hash%9));
+        if(LOG)
+          console.log("CELL NUMBER : "+cell_hash+" " + row_num + " " + col_num);
+        if(Boolean(vis[cell_hash]) === true) continue;
+        for(var val = 1;val<10;++val){
+          // if(!grid[row_num][col_num]){
+          //   console.log("CELL NUMBER : "+cell_hash+" " + row_num + " " + col_num);
+          //   continue;
+          // }
+          grid[row_num][col_num].v = val;
+          if(this.validateSudoku(grid)===true){
+            // console.log(grid[row_num][col_num]);
+            // console.log("here! with "+val);`
+            mark[row_num][col_num] = true;//mark this flag for indicating that grid value is priorily set by user or by puzzle builder
+            read[row_num][col_num] = true;//mark this cell as readOnly
+            vis[cell_hash] = true;//mark this cell visited
+            break;
+          }
+          grid[row_num][col_num].v = 0;
+        }
+      }
+      var test = grid;
+      if(this.fillGrid(test)===true)
+      {
+        break;
+      }
+      this.resetGrid();
+      grid = this.state.board;
+      mark = this.state.userEntered;
+      read = this.state.readOnly;
+      vis  = new Array(81);
+      for(let i = 0;i<81;++i){
+        vis[i] = false;
+      }
+    } 
+
+    this.setState({board:grid,userEntered:mark,readOnly:read});
+  };
+
  notifyError = () => {
     if (this.validateSudoku(this.state.board) === false) {
       toast.error("Puzzle is invalid!", {
@@ -57,7 +114,7 @@ class GRID extends Component {
     var row = event.target.dataset.rw;
     var col = event.target.dataset.cl;
     var new_val = event.target.value;
-    new_val = new_val % 10;
+    new_val = Number(new_val % 10);
     var a = this.state.board;
     var mark = this.state.userEntered;
     if(LOG===1)
@@ -87,7 +144,7 @@ class GRID extends Component {
      * console.log("onBlur called " + event.target.dataset.value + "  "+ event.target.value);
      *  If there is now new value inputted and the elemen loses focus then we restore the previous value for it
     */
-     if (event.target.value === '') {
+    if (event.target.value === '') {
       event.target.value = Number(event.target.dataset.value);
     }
   };
@@ -101,7 +158,7 @@ class GRID extends Component {
     return (
       <React.Fragment>
         <div>
-        <span>SUDOKU OF THE DAY</span>
+        <span>SUDOKU</span>
         </div>
         <table id="grid" align="center">
           <colgroup><col /><col /><col /></colgroup>
@@ -131,10 +188,11 @@ class GRID extends Component {
                             // console.log(self);
                             var cols = new Array(0);
                             for (var cid = 0; cid < board[rid].length; ++cid) {
-                              var col = rid + "" + cid;
+                              var cellId = rid + "" + cid;
                               // console.log(col);
                               let cell = self.state.board[rid][cid];
                               var val = self.state.board[rid][cid].v;
+                              var readonly =  self.state.readOnly[rid][cid];
                               let classesBtn = "btn text-black";
                               let classesCell =
                                 "border border-black  text-black bg-" +
@@ -143,8 +201,9 @@ class GRID extends Component {
                                   : "white");
 
                               cols.push(
-                                <td id={col} key={col} className={classesCell}>
+                                <td id={cellId} key={cellId} className={classesCell}>
                                   <input
+                                    id = {cellId}
                                     className={classesBtn}
                                     size="1"
                                     key={cell}
@@ -158,6 +217,7 @@ class GRID extends Component {
                                     min="0"
                                     max="9"
                                     placeholder="0"
+                                    readOnly={Boolean(readonly)}
                                   />
                                 </td>
                               );
@@ -187,6 +247,9 @@ class GRID extends Component {
         <div className="nav justify-content-center bg-white">
           <button className="btn btn-info m-1 sm" onClick={this.resetGrid}>
             Reset Puzzle
+          </button>
+          <button className="btn btn-info m-1 sm" onClick={this.buildPuzzle}>
+            Build Puzzle
           </button>
           <button
             className="btn btn-success m-1 sm"
@@ -291,15 +354,15 @@ class GRID extends Component {
 
   fillGrid(grid, row, col, N) {
     //for curren row-r
-    if (LOG === 1) console.log(row + " " + col + " " + N);
+    // if (LOG === 1) console.log(row + " " + col + " " + N);
     if (row === N) {
-      for (var r = 0; r < N; ++r) {
-        var line = "";
-        for (var c = 0; c < N; ++c) {
-          line += grid[r][c].v + " ";
-        }
-        if (LOG === 1) console.log(r + "# : " + line);
-      }
+      // for (var r = 0; r < N; ++r) {
+      //   var line = "";
+      //   for (var c = 0; c < N; ++c) {
+      //     line += grid[r][c].v + " ";
+      //   }
+      //   if (LOG === 1) console.log(r + "# : " + line);
+      // }
       return true;
     }
     var next_row;
@@ -341,7 +404,10 @@ class GRID extends Component {
           "Sudoku is " + (ok_fill === true ? "solved" : "Impossible")
         );
       this.setState({ board: grid, unsolved: false });
-    } 
+    }
+    else{
+      console.log("Not able to solve the grid..."+ok_grid+" " + ok_fill);
+    }
     // console.log(grid);
     // console.log(this.state.board);
     // console.log("Grid is "+(this.validateSudoku(grid)===true?"valid":"invalid"));
