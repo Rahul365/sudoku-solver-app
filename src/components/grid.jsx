@@ -50,6 +50,11 @@ class GRID extends Component {
     this.setState({ board: grid, userEntered: mark,readOnly:read, unsolved: true });
   };
   
+  /**
+   * NOT READY TO USE YET
+   * This method is blocker. It freezes the application after 2 or 3 runs.
+   * 
+  */
   buildPuzzle = ()=>{
     this.resetGrid();
     var grid = this.state.board;
