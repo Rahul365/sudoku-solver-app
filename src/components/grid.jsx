@@ -56,13 +56,14 @@ class GRID extends Component {
    * 
   */
   buildPuzzle = ()=>{
-    this.resetGrid();
-    var grid = this.state.board;
-    var mark = this.state.userEntered;
-    var read = this.state.readOnly;
-    var vis  = new Array(81);
+    var grid,mark,read,vis;
     while(true){
-      var number_of_cells_to_fill = 20; //atmost this number of cells will be filled
+      this.resetGrid();
+      grid = this.state.board;
+      mark = this.state.userEntered;
+      read = this.state.readOnly;
+      vis  = new Array(81);
+      let number_of_cells_to_fill = 20; //atmost this number of cells will be filled
       for(var i = 0;i<=number_of_cells_to_fill;++i){
         var cell_hash =  Number(Math.floor(Math.random()*80)+1);
         var row_num = Number(Math.floor(cell_hash/9));
@@ -76,7 +77,7 @@ class GRID extends Component {
           //   continue;
           // }
           grid[row_num][col_num].v = val;
-          if(this.validateSudoku(grid)===true){
+          if(this.validateFill(grid,row_num,col_num)===true){
             // console.log(grid[row_num][col_num]);
             // console.log("here! with "+val);`
             mark[row_num][col_num] = true;//mark this flag for indicating that grid value is priorily set by user or by puzzle builder
@@ -88,20 +89,10 @@ class GRID extends Component {
         }
       }
       var test = grid;
-      if(this.fillGrid(test)===true)
-      {
+      if(this.fillGrid(test)===true){
         break;
       }
-      this.resetGrid();
-      grid = this.state.board;
-      mark = this.state.userEntered;
-      read = this.state.readOnly;
-      vis  = new Array(81);
-      for(let i = 0;i<81;++i){
-        vis[i] = false;
-      }
     } 
-
     this.setState({board:grid,userEntered:mark,readOnly:read});
   };
 
@@ -243,34 +234,7 @@ class GRID extends Component {
     );
   }
 
-  render() {
-    return (
-      <React.Fragment>
-        <main className="container" onLoad={this.buildGrid}>
-          {this.showgrid()}
-        </main>
-        <div className="nav justify-content-center bg-white">
-          <button className="btn btn-info m-1 sm" onClick={this.resetGrid}>
-            Reset Puzzle
-          </button>
-          <button className="btn btn-info m-1 sm" onClick={this.buildPuzzle}>
-            Build Puzzle
-          </button>
-          <button
-            className="btn btn-success m-1 sm"
-            onClick={() => {
-              this.solveGrid();
-              this.notifyError();
-            }}
-          >
-            Solve Puzzle
-          </button>
-          <ToastContainer />
-        </div>
-      </React.Fragment>
-    );
-  }
-
+  
   valuesCheck(grid, N) {
     for (var row = 0; row < N; ++row) {
       var cnt = new Array(N + 1);
@@ -312,6 +276,70 @@ class GRID extends Component {
       }
     }
     return 1;
+  }
+/**
+ * 
+ * To check a particular 3*3 cell for multiple occurrences of same element
+ */
+  BlockCheck(grid,start_row,start_col){
+    var occ = new Array(11);
+    for(let i = 0;i<11;++i){
+       occ[i] = 0;
+    }
+    // console.log("Col : "+start_col + " " + Math.floor(start_col/3) + " " +Math.round(start_col/3) );
+    let blk_row = Math.floor(3*Math.floor(start_row/3));
+    let blk_col = Math.floor(3*Math.floor(start_col/3));
+    // console.log("block col : "+blk_col +" ,"+ (blk_col+3));
+    for(var row = blk_row;row < (blk_row+3);row++){
+      for(var col = blk_col;col < (blk_col+3);col++){
+        // console.log(row +" : " + col);
+          var val = grid[row][col].v;
+          if(val!==0){
+            occ[val]++;
+            if(occ[val]>1) return 0;
+          }     
+      }
+    }
+    return 1;
+  }
+
+  RowCheckII(grid,row){
+    const N = grid.length;
+    let occ = new Array(11);
+    for(let i = 0;i<11;++i){
+       occ[i] = 0;
+    }
+    for(let col = 0;col < N;++col){
+      var val = grid[row][col].v;
+      if(val!==0){
+        occ[val]++;
+        if(occ[val]>1) return 0;
+      }     
+    }
+    return 1;
+  }
+
+  ColCheckII(grid,col){
+    const N = grid.length;
+    let occ = new Array(11);
+    for(let i = 0;i<11;++i){
+       occ[i] = 0;
+    }
+    for(let row = 0;row < N;++row){
+      var val = grid[row][col].v;
+      if(val!==0){
+        occ[val]++;
+        if(occ[val]>1) return 0;
+      } 
+    }
+    return 1;
+  }
+
+  validateFill(grid,row,col){
+    if (this.RowCheckII(grid,row) === 0) return false;
+    if (this.ColCheckII(grid,col) === 0) return false;
+    if (this.BlockCheck(grid,row,col) === 0) return false;
+    return true;
   }
 
   CellCheck(grid, N) {
@@ -357,27 +385,18 @@ class GRID extends Component {
     return true;
   }
 
+
   fillGrid(grid, row, col, N) {
-    //for curren row-r
-    // if (LOG === 1) console.log(row + " " + col + " " + N);
     if (row === N) {
-      // for (var r = 0; r < N; ++r) {
-      //   var line = "";
-      //   for (var c = 0; c < N; ++c) {
-      //     line += grid[r][c].v + " ";
-      //   }
-      //   if (LOG === 1) console.log(r + "# : " + line);
-      // }
+      // if(this.validateSudoku(grid) === true) return true; 
       return true;
     }
     var next_row;
     var next_col;
     if (Number(grid[row][col].v) === 0) {
-      // console.log("Yes");
       for (var val = 1; val <= 9; ++val) {
         grid[row][col].v = val;
-        if (this.validateSudoku(grid) === true) {
-          // console.log(val +" Yes");
+        if (this.validateFill(grid,row,col) === true) {
           next_col = (col + 1) % N;
           next_row = row + (next_col === 0 ? 1 : 0);
           if (this.fillGrid(grid, next_row, next_col, N)) {
@@ -397,12 +416,10 @@ class GRID extends Component {
   }
 
   solveGrid = () => {
-    // console.log(this.state.board);
     if (LOG === 1) console.log("Solving Puzzle....");
     var grid = this.state.board;
     var ok_fill = this.fillGrid(grid, 0, 0, grid.length) === true ? 1 : 0;
     var ok_grid = this.validateSudoku(grid) === true ? 1 : 0;
-    // console.log(grid);
     if (ok_grid === 1 && ok_fill === 1) {
       if (LOG === 1)
         console.log(
@@ -413,10 +430,36 @@ class GRID extends Component {
     else{
       console.log("Not able to solve the grid..."+ok_grid+" " + ok_fill);
     }
-    // console.log(grid);
-    // console.log(this.state.board);
-    // console.log("Grid is "+(this.validateSudoku(grid)===true?"valid":"invalid"));
-  };
+  }
+
+  render() {
+    return (
+      <React.Fragment>
+        <main className="container" onLoad={this.buildGrid}>
+          {this.showgrid()}
+        </main>
+        <div className="nav justify-content-center bg-white">
+          <button className="btn btn-info m-1 sm" onClick={this.resetGrid}>
+            Reset Puzzle
+          </button>
+          <button className="btn btn-info m-1 sm" onClick={this.buildPuzzle}>
+            Build Puzzle
+          </button>
+          <button
+            className="btn btn-success m-1 sm"
+            onClick={() => {
+              this.solveGrid();
+              this.notifyError();
+            }}
+          >
+            Solve Puzzle
+          </button>
+          <ToastContainer />
+        </div>
+      </React.Fragment>
+    );
+  }
+
 }
 
 export default GRID;
