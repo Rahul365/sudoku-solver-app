@@ -51,8 +51,7 @@ class GRID extends Component {
   };
   
   /**
-   * NOT READY TO USE YET
-   * This method is blocker. It freezes the application after 2 or 3 runs.
+   * READY TO USE
    * 
   */
   buildPuzzle = ()=>{
@@ -107,6 +106,9 @@ class GRID extends Component {
 
   updateValueOnChange = (event) => {
     /**If any new value is inputted by the user, then this function will come in effect*/
+    if(LOG === 1){
+        console.log("on update value change :: ");
+    }
     var row = event.target.dataset.rw;
     var col = event.target.dataset.cl;
     var new_val = event.target.value;
@@ -114,14 +116,14 @@ class GRID extends Component {
     var a = this.state.board;
     var mark = this.state.userEntered;
     if(LOG===1)
-    console.log(row + " " + col + " "+ new_val + " " + mark[row][col] );
+     console.log(row + " " + col + " "+ new_val + " " + mark[row][col] );
     a[row][col].v = new_val;
     if (this.state.unsolved === true) {
        mark[row][col] = (new_val >= 1 && new_val<=9)? true : false; //mark this cell as userEntered
     }
     if(LOG===1)
-    console.log(row + " " + col + " "+ new_val + " " + mark[row][col] );
-    event.target.value = new_val; //we update the value the target value to new value here
+     console.log(row + " " + col + " "+ new_val + " " + mark[row][col] );
+    event.target.value = new_val===0?' ':new_val; //we update the value the target value to new value here
     this.setState({ board: a, userEntered: mark });
   };
 
@@ -131,6 +133,9 @@ class GRID extends Component {
      * console.log("onFocus called " + event.target.dataset);
      * Store the previous value of the element in data-value and reset the value of the element
      */
+    if(LOG === 1){
+      console.log("onFocus called " + event.target.dataset.value);
+    }
     event.target.dataset.value = Number(event.target.value);
     event.target.value = '';
   };
@@ -140,8 +145,12 @@ class GRID extends Component {
      * console.log("onBlur called " + event.target.dataset.value + "  "+ event.target.value);
      *  If there is now new value inputted and the elemen loses focus then we restore the previous value for it
     */
+   if(LOG === 1){
+      console.log("onBlur called " + event.target.dataset.value + "  "+ event.target.value);
+   }
     if (event.target.value === '') {
-      event.target.value = Number(event.target.dataset.value);
+      let val = Number(event.target.dataset.value);
+      event.target.value = val===0?'':val;
     }
   };
 
@@ -188,35 +197,35 @@ class GRID extends Component {
                               // console.log(col);
                               let cell = self.state.board[rid][cid];
                               var val = self.state.board[rid][cid].v;
+                              val = val === 0 || isNaN(val)?" ":val;
                               var readonly =  self.state.readOnly[rid][cid];
                               let classesBtn = "btn text-black";
                               let classesCell =
                                 "border border-black  text-black bg-" +
                                 (self.state.userEntered[rid][cid] === true
-                                  ? "warning"
+                                  ? (readonly===true?"warning":"secondary")
                                   : "white");
-
-                              cols.push(
-                                <td id={cellId} key={cellId} className={classesCell}>
-                                  <input
-                                    id = {cellId}
-                                    className={classesBtn}
-                                    size="1"
-                                    key={cell}
-                                    onChange={self.updateValueOnChange}
-                                    onFocus={self.updateValueOnFocus}
-                                    onBlur={self.updateValueOnBlur}
-                                    data-rw={rid}
-                                    data-cl={cid}
-                                    value={val}
-                                    type="number"
-                                    min="0"
-                                    max="9"
-                                    placeholder="0"
-                                    readOnly={Boolean(readonly)}
-                                  />
-                                </td>
-                              );
+                                cols.push(
+                                  <td id={cellId} key={cellId} className={classesCell}>
+                                    <input
+                                      id = {cellId}
+                                      className={classesBtn}
+                                      size="1"
+                                      key={cell}
+                                      onChange={self.updateValueOnChange}
+                                      onFocus={self.updateValueOnFocus}
+                                      onBlur={self.updateValueOnBlur}
+                                      data-rw={rid}
+                                      data-cl={cid}
+                                      value={val}
+                                      // type="number"
+                                      min="0"
+                                      max="9"
+                                      placeholder=" "
+                                      readOnly={Boolean(readonly)}
+                                    />
+                                  </td>
+                                );
                             }
                             return cols;
                           })(i)
@@ -416,15 +425,12 @@ class GRID extends Component {
   }
 
   solveGrid = () => {
-    if (LOG === 1) console.log("Solving Puzzle....");
+    if (LOG === 1) 
+      console.log("Solving Puzzle....");
     var grid = this.state.board;
     var ok_fill = this.fillGrid(grid, 0, 0, grid.length) === true ? 1 : 0;
     var ok_grid = this.validateSudoku(grid) === true ? 1 : 0;
     if (ok_grid === 1 && ok_fill === 1) {
-      if (LOG === 1)
-        console.log(
-          "Sudoku is " + (ok_fill === true ? "solved" : "Impossible")
-        );
       this.setState({ board: grid, unsolved: false });
     }
     else{
