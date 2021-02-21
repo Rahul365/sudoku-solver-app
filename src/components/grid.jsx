@@ -203,7 +203,7 @@ class GRID extends Component {
                               let classesCell =
                                 "border border-black  text-black bg-" +
                                 (self.state.userEntered[rid][cid] === true
-                                  ? (readonly===true?"warning":"secondary")
+                                  ? (readonly===true?"warning":"light")
                                   : "white");
                                 cols.push(
                                   <td id={cellId} key={cellId} className={classesCell}>
