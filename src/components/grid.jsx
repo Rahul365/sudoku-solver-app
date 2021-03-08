@@ -55,14 +55,15 @@ class GRID extends Component {
    * 
   */
   buildPuzzle = ()=>{
-    var grid,mark,read,vis;
-    while(true){
+    let grid,mark,read,vis;
+    // while(true){
       this.resetGrid();
       grid = this.state.board;
       mark = this.state.userEntered;
       read = this.state.readOnly;
       vis  = new Array(81);
-      let number_of_cells_to_fill = 20; //atmost this number of cells will be filled
+      /** Here number of cells to fill limit is to be kept under 12 or less for the program to perform optimally */
+      let number_of_cells_to_fill = 12; //atmost this number of cells will be filled
       for(var i = 0;i<=number_of_cells_to_fill;++i){
         var cell_hash =  Number(Math.floor(Math.random()*80)+1);
         var row_num = Number(Math.floor(cell_hash/9));
@@ -87,17 +88,17 @@ class GRID extends Component {
           grid[row_num][col_num].v = 0;
         }
       }
-      var test = grid;
-      if(this.fillGrid(test)===true){
-        break;
-      }
-    } 
+    //   var test = grid;
+    //   if(this.fillGrid(test)===true){
+    //     break;
+    //   }
+    // } 
     this.setState({board:grid,userEntered:mark,readOnly:read});
   };
 
  notifyError = () => {
     if (this.validateSudoku(this.state.board) === false) {
-      toast.error("Puzzle is invalid!", {
+      toast.error("Puzzle is invalid!, rebuild the puzzle again...", {
         position: toast.POSITION.TOP_LEFT,
         autoClose: 2000,
       });
@@ -429,12 +430,11 @@ class GRID extends Component {
       console.log("Solving Puzzle....");
     var grid = this.state.board;
     var ok_fill = this.fillGrid(grid, 0, 0, grid.length) === true ? 1 : 0;
-    var ok_grid = this.validateSudoku(grid) === true ? 1 : 0;
-    if (ok_grid === 1 && ok_fill === 1) {
+    if (ok_fill === 1 && this.validateSudoku(grid) === true) {
       this.setState({ board: grid, unsolved: false });
     }
     else{
-      console.log("Not able to solve the grid..."+ok_grid+" " + ok_fill);
+      console.log("Not able to solve the grid..." + ok_fill);
     }
   }
 
