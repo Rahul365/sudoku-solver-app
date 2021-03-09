@@ -3,7 +3,7 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "../customcss/custom.css";
 const LOG = 0;
-
+const fill_count = 12;
 class GRID extends Component {
   state = {
     board: [],
@@ -63,7 +63,7 @@ class GRID extends Component {
       read = this.state.readOnly;
       vis  = new Array(81);
       /** Here number of cells to fill limit is to be kept under 12 or less for the program to perform optimally */
-      let number_of_cells_to_fill = 12; //atmost this number of cells will be filled
+      let number_of_cells_to_fill = fill_count; //atmost this number of cells will be filled
       for(var i = 0;i<=number_of_cells_to_fill;++i){
         var cell_hash =  Number(Math.floor(Math.random()*80)+1);
         var row_num = Number(Math.floor(cell_hash/9));
