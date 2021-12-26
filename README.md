@@ -35,17 +35,17 @@ See the section about [deployment](https://facebook.github.io/create-react-app/d
 
 ## Docker Support
 To build docker image.<br/>
-### docker build -t sudoku-app .
+### `docker build -t sudoku-app .`
 
 To run docker image with shell in interactive mode<br/>
-### docker run -it sudoku-app sh
+### `docker run -it sudoku-app sh`
 
 To run docker image without shell in interactive mode
-### docker run -it sudoku-app
+### `docker run -it sudoku-app`
 
 To delete unused containers and images.
-### docker container prune
-### docker image prune
+### `docker container prune`
+### `docker image prune`
 
 
 
